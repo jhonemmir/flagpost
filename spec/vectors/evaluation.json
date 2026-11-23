@@ -1,0 +1,642 @@
+{
+  "vectorsVersion": 1,
+  "description": "Shared contract vectors for the flag evaluation algorithm. Every implementation (PHP API, C# SDK) must pass all of them. vectorsVersion describes the format of this file; the wire schemaVersion in GET /v1/sdk/flags is a separate counter.",
+  "algorithm": {
+    "bucketInput": "UTF-8 bytes of '{flagKey}:{userId}'",
+    "hash": "SHA-256",
+    "bucket": "first 4 bytes of the digest as a big-endian unsigned 32-bit integer, modulo 100 (range 0-99)",
+    "inside": "bucket < percentage"
+  },
+  "bucketVectors": [
+    {
+      "id": "B01",
+      "flagKey": "new-checkout",
+      "userId": "alice",
+      "first4BytesHex": "ff561642",
+      "bucket": 74
+    },
+    {
+      "id": "B02",
+      "flagKey": "new-checkout",
+      "userId": "bob",
+      "first4BytesHex": "be1f8a9c",
+      "bucket": 40
+    },
+    {
+      "id": "B03",
+      "flagKey": "new-checkout",
+      "userId": "Alice",
+      "first4BytesHex": "a04158bd",
+      "bucket": 17
+    },
+    {
+      "id": "B04",
+      "flagKey": "new-checkout",
+      "userId": " alice",
+      "first4BytesHex": "8b1fa029",
+      "bucket": 41
+    },
+    {
+      "id": "B05",
+      "flagKey": "dark-mode",
+      "userId": "alice",
+      "first4BytesHex": "442fc290",
+      "bucket": 88
+    },
+    {
+      "id": "B06",
+      "flagKey": "dark-mode",
+      "userId": "bob",
+      "first4BytesHex": "adb8322b",
+      "bucket": 35
+    },
+    {
+      "id": "B07",
+      "flagKey": "new-checkout",
+      "userId": "ñandú",
+      "first4BytesHex": "3ae8e8a2",
+      "bucket": 34
+    },
+    {
+      "id": "B08",
+      "flagKey": "new-checkout",
+      "userId": "🚀",
+      "first4BytesHex": "eb082b56",
+      "bucket": 42
+    },
+    {
+      "id": "B09",
+      "flagKey": "new-checkout",
+      "userId": "日本語",
+      "first4BytesHex": "6364d827",
+      "bucket": 19
+    },
+    {
+      "id": "B10",
+      "flagKey": "new-checkout",
+      "userId": "a:b",
+      "first4BytesHex": "9ef8ec38",
+      "bucket": 28
+    },
+    {
+      "id": "B11",
+      "flagKey": "new-checkout",
+      "userId": "user-1",
+      "first4BytesHex": "c3da3593",
+      "bucket": 83
+    },
+    {
+      "id": "B12",
+      "flagKey": "new-checkout",
+      "userId": "user-2",
+      "first4BytesHex": "fcc97079",
+      "bucket": 61
+    },
+    {
+      "id": "B13",
+      "flagKey": "new-checkout",
+      "userId": "user-42",
+      "first4BytesHex": "50a89a30",
+      "bucket": 0
+    },
+    {
+      "id": "B14",
+      "flagKey": "new-checkout",
+      "userId": "user-466",
+      "first4BytesHex": "ee7c5705",
+      "bucket": 49
+    },
+    {
+      "id": "B15",
+      "flagKey": "new-checkout",
+      "userId": "user-116",
+      "first4BytesHex": "9f7e3ba6",
+      "bucket": 50
+    },
+    {
+      "id": "B16",
+      "flagKey": "new-checkout",
+      "userId": "user-171",
+      "first4BytesHex": "c7c3b40e",
+      "bucket": 98
+    },
+    {
+      "id": "B17",
+      "flagKey": "new-checkout",
+      "userId": "user-17",
+      "first4BytesHex": "504b30e7",
+      "bucket": 99
+    },
+    {
+      "id": "B18",
+      "flagKey": "new-checkout",
+      "userId": "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu",
+      "first4BytesHex": "f5b6a3bd",
+      "bucket": 89
+    },
+    {
+      "id": "B19",
+      "flagKey": "a",
+      "userId": "x",
+      "first4BytesHex": "ef7e44ae",
+      "bucket": 42
+    },
+    {
+      "id": "B20",
+      "flagKey": "beta.search_v2",
+      "userId": "42",
+      "first4BytesHex": "9307ea2d",
+      "bucket": 53
+    }
+  ],
+  "evaluationCases": [
+    {
+      "id": "E01",
+      "name": "flag missing, default false",
+      "flagKey": "new-checkout",
+      "flag": null,
+      "userId": "alice",
+      "defaultValue": false,
+      "expected": {
+        "value": false,
+        "reason": "NOT_FOUND"
+      }
+    },
+    {
+      "id": "E02",
+      "name": "flag missing, default true",
+      "flagKey": "new-checkout",
+      "flag": null,
+      "userId": "alice",
+      "defaultValue": true,
+      "expected": {
+        "value": true,
+        "reason": "NOT_FOUND"
+      }
+    },
+    {
+      "id": "E03",
+      "name": "disabled flag wins over allow list",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": false,
+        "percentage": 100,
+        "allowList": [
+          "alice"
+        ]
+      },
+      "userId": "alice",
+      "defaultValue": false,
+      "expected": {
+        "value": false,
+        "reason": "DISABLED"
+      }
+    },
+    {
+      "id": "E04",
+      "name": "disabled flag at 100 percent",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": false,
+        "percentage": 100,
+        "allowList": []
+      },
+      "userId": "alice",
+      "defaultValue": true,
+      "expected": {
+        "value": false,
+        "reason": "DISABLED"
+      }
+    },
+    {
+      "id": "E05",
+      "name": "allow list match at 0 percent",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 0,
+        "allowList": [
+          "alice"
+        ]
+      },
+      "userId": "alice",
+      "defaultValue": false,
+      "expected": {
+        "value": true,
+        "reason": "ALLOW_LIST"
+      }
+    },
+    {
+      "id": "E06",
+      "name": "allow list match overrides bucket outside rollout",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 50,
+        "allowList": [
+          "user-241"
+        ]
+      },
+      "userId": "user-241",
+      "defaultValue": false,
+      "expected": {
+        "value": true,
+        "reason": "ALLOW_LIST"
+      }
+    },
+    {
+      "id": "E07",
+      "name": "allow list is case-sensitive at 0 percent",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 0,
+        "allowList": [
+          "Alice"
+        ]
+      },
+      "userId": "alice",
+      "defaultValue": false,
+      "expected": {
+        "value": false,
+        "reason": "NO_ROLLOUT"
+      }
+    },
+    {
+      "id": "E08",
+      "name": "allow list without user id falls through",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 100,
+        "allowList": [
+          "alice"
+        ]
+      },
+      "userId": null,
+      "defaultValue": false,
+      "expected": {
+        "value": true,
+        "reason": "FULL_ROLLOUT"
+      }
+    },
+    {
+      "id": "E09",
+      "name": "100 percent without user id",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 100,
+        "allowList": []
+      },
+      "userId": null,
+      "defaultValue": false,
+      "expected": {
+        "value": true,
+        "reason": "FULL_ROLLOUT"
+      }
+    },
+    {
+      "id": "E10",
+      "name": "0 percent",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 0,
+        "allowList": []
+      },
+      "userId": "alice",
+      "defaultValue": true,
+      "expected": {
+        "value": false,
+        "reason": "NO_ROLLOUT"
+      }
+    },
+    {
+      "id": "E11",
+      "name": "partial rollout without user id returns default (false)",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 50,
+        "allowList": []
+      },
+      "userId": null,
+      "defaultValue": false,
+      "expected": {
+        "value": false,
+        "reason": "MISSING_USER_ID"
+      }
+    },
+    {
+      "id": "E12",
+      "name": "partial rollout without user id returns default (true)",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 50,
+        "allowList": []
+      },
+      "userId": null,
+      "defaultValue": true,
+      "expected": {
+        "value": true,
+        "reason": "MISSING_USER_ID"
+      }
+    },
+    {
+      "id": "E13",
+      "name": "empty user id is treated as missing",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 50,
+        "allowList": []
+      },
+      "userId": "",
+      "defaultValue": true,
+      "expected": {
+        "value": true,
+        "reason": "MISSING_USER_ID"
+      }
+    },
+    {
+      "id": "E14",
+      "name": "bucket = percentage - 1 is inside",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 50,
+        "allowList": []
+      },
+      "userId": "user-466",
+      "defaultValue": false,
+      "expected": {
+        "value": true,
+        "reason": "PERCENTAGE_IN"
+      }
+    },
+    {
+      "id": "E15",
+      "name": "bucket = percentage is outside",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 50,
+        "allowList": []
+      },
+      "userId": "user-116",
+      "defaultValue": true,
+      "expected": {
+        "value": false,
+        "reason": "PERCENTAGE_OUT"
+      }
+    },
+    {
+      "id": "E16",
+      "name": "1 percent, bucket 0 is inside",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 1,
+        "allowList": []
+      },
+      "userId": "user-42",
+      "defaultValue": false,
+      "expected": {
+        "value": true,
+        "reason": "PERCENTAGE_IN"
+      }
+    },
+    {
+      "id": "E17",
+      "name": "99 percent, bucket 99 is outside",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 99,
+        "allowList": []
+      },
+      "userId": "user-17",
+      "defaultValue": true,
+      "expected": {
+        "value": false,
+        "reason": "PERCENTAGE_OUT"
+      }
+    },
+    {
+      "id": "E18",
+      "name": "99 percent, bucket 98 is inside",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 99,
+        "allowList": []
+      },
+      "userId": "user-171",
+      "defaultValue": false,
+      "expected": {
+        "value": true,
+        "reason": "PERCENTAGE_IN"
+      }
+    },
+    {
+      "id": "E19",
+      "name": "unicode latin user id",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 50,
+        "allowList": []
+      },
+      "userId": "ñandú",
+      "defaultValue": false,
+      "expected": {
+        "value": true,
+        "reason": "PERCENTAGE_IN"
+      }
+    },
+    {
+      "id": "E20",
+      "name": "emoji user id",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 50,
+        "allowList": []
+      },
+      "userId": "🚀",
+      "defaultValue": false,
+      "expected": {
+        "value": true,
+        "reason": "PERCENTAGE_IN"
+      }
+    },
+    {
+      "id": "E21",
+      "name": "cjk user id",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 50,
+        "allowList": []
+      },
+      "userId": "日本語",
+      "defaultValue": false,
+      "expected": {
+        "value": true,
+        "reason": "PERCENTAGE_IN"
+      }
+    },
+    {
+      "id": "E22",
+      "name": "256-character user id",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 50,
+        "allowList": []
+      },
+      "userId": "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu",
+      "defaultValue": true,
+      "expected": {
+        "value": false,
+        "reason": "PERCENTAGE_OUT"
+      }
+    },
+    {
+      "id": "E23",
+      "name": "user id containing a colon",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 50,
+        "allowList": []
+      },
+      "userId": "a:b",
+      "defaultValue": false,
+      "expected": {
+        "value": true,
+        "reason": "PERCENTAGE_IN"
+      }
+    },
+    {
+      "id": "E24",
+      "name": "leading space is significant",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 50,
+        "allowList": []
+      },
+      "userId": " alice",
+      "defaultValue": false,
+      "expected": {
+        "value": true,
+        "reason": "PERCENTAGE_IN"
+      }
+    },
+    {
+      "id": "E25",
+      "name": "different flag key, same user",
+      "flagKey": "dark-mode",
+      "flag": {
+        "enabled": true,
+        "percentage": 50,
+        "allowList": []
+      },
+      "userId": "alice",
+      "defaultValue": true,
+      "expected": {
+        "value": false,
+        "reason": "PERCENTAGE_OUT"
+      }
+    },
+    {
+      "id": "E26",
+      "name": "disabled flag without a user id ignores the default",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": false,
+        "percentage": 50,
+        "allowList": []
+      },
+      "userId": null,
+      "defaultValue": true,
+      "expected": {
+        "value": false,
+        "reason": "DISABLED"
+      }
+    },
+    {
+      "id": "E27",
+      "name": "allow list wins over full rollout",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 100,
+        "allowList": [
+          "alice"
+        ]
+      },
+      "userId": "alice",
+      "defaultValue": false,
+      "expected": {
+        "value": true,
+        "reason": "ALLOW_LIST"
+      }
+    },
+    {
+      "id": "E28",
+      "name": "0 percent without a user id ignores the default",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 0,
+        "allowList": []
+      },
+      "userId": null,
+      "defaultValue": true,
+      "expected": {
+        "value": false,
+        "reason": "NO_ROLLOUT"
+      }
+    },
+    {
+      "id": "E29",
+      "name": "allow list is case-sensitive when the bucket is outside",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 50,
+        "allowList": [
+          "Alice"
+        ]
+      },
+      "userId": "alice",
+      "defaultValue": true,
+      "expected": {
+        "value": false,
+        "reason": "PERCENTAGE_OUT"
+      }
+    },
+    {
+      "id": "E30",
+      "name": "256-byte user id in the allow list",
+      "flagKey": "new-checkout",
+      "flag": {
+        "enabled": true,
+        "percentage": 50,
+        "allowList": [
+          "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu"
+        ]
+      },
+      "userId": "uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu",
+      "defaultValue": false,
+      "expected": {
+        "value": true,
+        "reason": "ALLOW_LIST"
+      }
+    }
+  ]
+}

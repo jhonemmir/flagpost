@@ -1,0 +1,35 @@
+# --- .NET ---
+[Bb]in/
+[Oo]bj/
+artifacts/
+TestResults/
+*.user
+*.suo
+.vs/
+*.nupkg
+*.snupkg
+.nuget/
+
+# --- PHP / Composer ---
+vendor/
+.phpunit.result.cache
+.phpunit.cache/
+.php-cs-fixer.cache
+coverage/
+
+# --- Environment and secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- Editors and OS ---
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# --- Local overrides ---
+docker-compose.override.yml
+*.local

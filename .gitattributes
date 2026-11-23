@@ -1,0 +1,11 @@
+# Normalize line endings in the repository so PHP and .NET tooling see the same bytes.
+* text=auto eol=lf
+
+*.gif binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.pdf binary
+
+*.sln text eol=crlf
