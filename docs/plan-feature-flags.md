@@ -78,25 +78,29 @@ flagpost/
 ## 3. Etapas
 
 ### Etapa 0: Revisión de la especificación (medio día)
-- [ ] Leer el ADR, la spec y el contrato completos y ajustar lo que no te convenza.
+- [x] Leer el ADR, la spec y el contrato completos y ajustar lo que no te convenza.
 - [ ] Verificar la disponibilidad del nombre (GitHub, NuGet `Flagpost.Client`, Packagist si lo reservas).
 - [ ] Cambiar el estado del ADR a *Accepted*.
-- [ ] Verificar versiones: PHP 8.4 o superior, la versión estable de Laravel que lo soporte y los paquetes de Microsoft.Extensions para `net8.0` y `net10.0`. Anota las versiones y la fecha en el ADR.
+- [x] Verificar versiones: PHP 8.4 o superior, la versión estable de Laravel que lo soporte y los paquetes de Microsoft.Extensions para `net8.0` y `net10.0`. Anota las versiones y la fecha en el ADR.
+
+**Versiones verificadas (2026-11-23):** PHP 8.4.28, Laravel 13.43.0, Pest 4.7.8, Larastan 3.15.0, Pint 1.32.3, .NET SDK 10.0.404 (biblioteca multi-target `net8.0`/`net10.0`). El SDK 10 descarga los paquetes de referencia de .NET 8 desde NuGet; no hace falta instalar otro SDK.
 
 ### Etapa 1: Repositorio (medio día)
-- [ ] Crear el repo con licencia MIT, `.gitignore` de PHP/.NET y los documentos en `docs/` y `spec/`.
-- [ ] `global.json` y `Directory.Build.props` para .NET (nullable activado, warnings como errores).
-- [ ] Proyecto Laravel en `api/` con Pest, Larastan + PHPStan (nivel máximo) y Pint.
-- [ ] `docker-compose.yml` con la API y Postgres para trabajo local.
-- [ ] Primer commit con README mínimo.
+- [x] Crear el repo con licencia MIT, `.gitignore` de PHP/.NET y los documentos en `docs/` y `spec/`.
+- [x] `global.json` y `Directory.Build.props` para .NET (nullable activado, warnings como errores).
+- [x] Proyecto Laravel en `api/` con Pest, Larastan + PHPStan (nivel máximo) y Pint.
+- [x] `docker-compose.yml` con la API y Postgres para trabajo local (`scripts/dev-env.sh` genera `.env`).
+- [x] Primer commit con README mínimo.
 
 ### Etapa 2: Núcleo de evaluación en PHP (2 días)
 Primero el algoritmo, antes que cualquier endpoint.
-- [ ] `Bucketing::bucketDetailed()` con SHA-256, `unpack('N', ...)` y módulo 100; devuelve el hex de los primeros 4 bytes, el entero sin signo y el bucket.
-- [ ] `Evaluator::evaluate()` con los siete pasos en orden.
-- [ ] Un lector del archivo `evaluation.json` y tests que lo recorran (20 vectores + 30 casos); los vectores afirman el hex, el entero y el bucket.
-- [ ] Prueba de propiedad contra un oráculo independiente, no solo la monotonía: precedencia, determinismo, monotonía y totalidad, con 1.000 usuarios generados.
-- [ ] Pasar Larastan/PHPStan en nivel máximo.
+- [x] `Bucketing::bucketDetailed()` con SHA-256, `unpack('N', ...)` y módulo 100; devuelve el hex de los primeros 4 bytes, el entero sin signo y el bucket.
+- [x] `Evaluator::evaluate()` con los siete pasos en orden.
+- [x] Un lector del archivo `evaluation.json` y tests que lo recorran (20 vectores + 30 casos); los vectores afirman el hex, el entero y el bucket.
+- [x] Prueba de propiedad contra un oráculo independiente, no solo la monotonía: precedencia, determinismo, monotonía y totalidad, con 1.000 usuarios generados.
+- [x] Pasar Larastan/PHPStan en nivel máximo.
+
+**Resultado:** 56 tests de Pest, 248.080 aserciones. Los tests unitarios no arrancan Laravel: el evaluador es PHP puro.
 
 **Trampa conocida:** si algo falla en los vectores del hash, revisa primero el orden de bytes y que el entero sea sin signo.
 
@@ -115,21 +119,22 @@ Primero el algoritmo, antes que cualquier endpoint.
 - [ ] Tests de feature para cada endpoint y para los códigos 400, 401, 403, 404, 405, 409, 413, 415, 422 y 429.
 
 ### Etapa 4: SDK en C# (3 días)
-- [ ] `Bucketing` con `SHA256.HashData` y `BinaryPrimitives.ReadUInt32BigEndian`; `Evaluator` con los mismos siete pasos.
-- [ ] Tests de contrato sobre **el mismo** `spec/vectors/evaluation.json` y la misma prueba de propiedad.
+- [x] `Bucketing` con `SHA256.HashData` y `BinaryPrimitives.ReadUInt32BigEndian`; `Evaluator` con los mismos siete pasos.
+- [x] Tests de contrato sobre **el mismo** `spec/vectors/evaluation.json` y la misma prueba de propiedad.
 - [ ] `FlagClient` con snapshot inmutable que se reemplaza de forma atómica y `HashSet` ordinal por flag para las listas.
 - [ ] Poller con `ETag`, intervalo configurable (mínimo 5 s), jitter de ±20 %, timeout, `Retry-After` y retroceso exponencial en `401`/`403`/`429`.
 - [ ] Razón `NOT_READY` antes de la primera descarga.
 - [ ] Extensión `AddFlagpost(options => ...)` con servicio en segundo plano.
 - [ ] Tests con un `HttpMessageHandler` falso: primera descarga, `304`, fallo tras éxito, JSON inválido, campo con tipo incorrecto, `schemaVersion` desconocido, timeout y `401` con retroceso.
-- [ ] Multi-target `net8.0` y `net10.0`.
+- [x] Multi-target `net8.0` y `net10.0` en la biblioteca (los tests corren en `net10.0`).
 - [ ] Verificar que la llave nunca aparece en los logs.
 
 ### Etapa 5: CI (1 día)
-- [ ] `api-ci.yml`: Pint, Larastan/PHPStan y Pest contra SQLite **y** PostgreSQL.
-- [ ] `sdk-ci.yml`: build y tests en Linux y Windows para `net8.0` y `net10.0`, cobertura.
-- [ ] **Job de contrato:** corre ambas suites siempre; además, un job que valida `evaluation.json` (ids únicos, `first4BytesHex` coherente con el bucket, `vectorsVersion`).
-- [ ] Badges de estado en el README.
+- [x] `ci.yml` con job de PHP: Pint, Larastan/PHPStan y Pest contra SQLite **y** PostgreSQL.
+- [x] `ci.yml` con job de .NET: build multi-target y tests en Linux y Windows.
+- [x] **Job de contrato:** `scripts/check_vectors.py` valida `evaluation.json` (ids únicos, `first4BytesHex` coherente con el bucket, `vectorsVersion`) con una tercera implementación independiente. Las suites de PHP y C# corren en sus propios jobs de cada push.
+- [x] Badge de estado en el README.
+- [ ] Cobertura de código y ejecución de la suite de tests también en `net8.0`.
 
 ### Etapa 6: Despliegue y publicación (1,5 días)
 - [ ] `Dockerfile` de la API y despliegue en un plan gratuito (Render, Fly.io u Oracle Cloud Always Free) con Postgres gratuito (Neon o Supabase). Revisa las condiciones vigentes; los límites cambian.

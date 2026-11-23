@@ -53,6 +53,8 @@ This ADR records the decisions that shape v1.0. They bind the implementation, th
 | D19 | Repository layout | Single monorepo: `api/`, `sdk-dotnet/`, `spec/`, `samples/`, `docs/`. | The shared vectors need one source of truth. |
 | D20 | Distribution | SDK published to NuGet as `Flagpost.Client`. The API is an application: deployed from a Docker image, not published to Packagist. | Packagist is for libraries; the API is a service. |
 
+**Verified versions (2026-11-23):** PHP 8.4.28, Laravel 13.43.0, Pest 4.7.8, Larastan 3.15.0, Pint 1.32.3 and .NET SDK 10.0.404. `global.json` requests SDK 10.0.100 with `rollForward: latestFeature`; the SDK 10 restores the .NET 8 reference packs from NuGet, so no second SDK is needed. The Microsoft.Extensions packages are still unpinned: they will be added when `FlagClient` is implemented (stage 4).
+
 ### Detail: evaluation order (D4)
 
 1. Flag unknown → default (`NOT_FOUND`)

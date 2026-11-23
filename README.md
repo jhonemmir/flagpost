@@ -1,8 +1,10 @@
 # flagpost
 
+[![CI](https://github.com/jhonemmir/flagpost/actions/workflows/ci.yml/badge.svg)](https://github.com/jhonemmir/flagpost/actions/workflows/ci.yml)
+
 Feature flags with client-side evaluation: a small PHP API that stores the rules and a C# SDK that evaluates them locally, in process.
 
-> **Status: design.** The [evaluation spec](docs/evaluation-spec.md), the [API contract](docs/api-contract.md) and the shared [test vectors](spec/vectors/evaluation.json) are written and verified (20 bucket vectors and 30 evaluation cases). The API and the SDK are the next milestones; nothing is published yet.
+> **Status: early implementation.** The [evaluation spec](docs/evaluation-spec.md), the [API contract](docs/api-contract.md) and the shared [test vectors](spec/vectors/evaluation.json) are written and verified. The evaluation core now exists in PHP and C#: both suites pass the same 20 bucket vectors, 30 evaluation cases and property tests. The HTTP endpoints, the SDK poller and the NuGet package are still to come.
 
 `flagpost` is a working name. It must be checked on GitHub, NuGet and Packagist before the first public release.
 
@@ -32,8 +34,8 @@ A user is inside the rollout when `bucket < percentage`. Raising the percentage 
 ```
 docs/                  ADR, evaluation spec, API contract, project plan
 spec/vectors/          Shared contract vectors (single source of truth)
-api/                   Laravel API (PHP 8.4)                — planned, stage 1
-sdk-dotnet/            Flagpost.Client (net8.0 / net10.0)   — planned, stage 4
+api/                   Laravel API (PHP 8.4): evaluation core done, endpoints pending
+sdk-dotnet/            Flagpost.Client (net8.0 / net10.0): evaluation core done, sync pending
 samples/               Example ASP.NET Core application     — planned, stage 7
 ```
 
@@ -46,16 +48,38 @@ samples/               Example ASP.NET Core application     — planned, stage 7
 | [Evaluation spec](docs/evaluation-spec.md) | Algorithm, invariants, reason codes and 30 cases |
 | [API contract](docs/api-contract.md) | HTTP contract v1, errors, limits and rate limits |
 
-## Quick start
+## Local development
 
-There is no runnable code yet. The first milestone is the evaluation core, tested only with the shared vectors. Once the API exists, the intended flow is:
+Requires Docker with Compose and `openssl`.
 
 ```bash
-docker compose up
-# create an environment key, then a flag, and poll it from the SDK
+scripts/dev-env.sh            # creates .env with random APP_KEY, admin key and DB password (once)
+docker compose up --build     # API at http://localhost:8000, PostgreSQL alongside it
+curl http://localhost:8000/up # "Application up"
+docker compose run --rm api php artisan migrate --force
+docker compose down
 ```
 
-The API will ship as a Docker image; the SDK will be published to NuGet as `Flagpost.Client`.
+`.env` is ignored by git. Migrations are deliberately a *release command*, not part of container startup. The API image uses Laravel's built-in server, which is enough for the demo; swap in php-fpm behind a reverse proxy for real traffic.
+
+## Checks
+
+```bash
+python3 scripts/check_vectors.py                       # independent JSON/vector validator
+
+cd api
+./vendor/bin/pint --test
+./vendor/bin/phpstan analyse --no-progress
+./vendor/bin/pest
+
+cd ../sdk-dotnet
+dotnet build Flagpost.sln -c Release
+dotnet test Flagpost.sln -c Release --no-build
+```
+
+The PHP and .NET test projects both read `spec/vectors/evaluation.json`; the .NET project copies it into its build output. The same commands run in [CI](.github/workflows/ci.yml), where the PHP suite is also run against PostgreSQL.
+
+The API will eventually ship as a Docker image; the SDK will be published to NuGet as `Flagpost.Client`.
 
 ## Security
 
@@ -74,9 +98,10 @@ MIT. See [LICENSE](LICENSE).
 
 `flagpost` es un servicio de *feature flags* con evaluación en el cliente: una API en PHP guarda las reglas y un SDK en C# las evalúa localmente, sin llamadas de red por cada comprobación.
 
-**Estado:** fase de diseño. La especificación, el contrato HTTP y los vectores compartidos están escritos y verificados (20 vectores del hash y 30 casos). La API y el SDK son los siguientes hitos; todavía no hay nada publicado.
+**Estado:** implementación inicial. La especificación, el contrato HTTP y los vectores compartidos están escritos y verificados. El núcleo de evaluación ya está implementado en PHP y en C#: ambas suites pasan los mismos 20 vectores del hash, 30 casos y pruebas de propiedad. Faltan los endpoints HTTP, el poller del SDK y la publicación.
 
 - **Un solo algoritmo, dos lenguajes:** SHA-256 de `flagKey:userId`, primeros 4 bytes como entero sin signo, módulo 100. Un usuario siempre cae en el mismo grupo y subir el porcentaje nunca le quita la función a nadie.
+- **Arranque local:** `scripts/dev-env.sh`, `docker compose up --build` y `docker compose run --rm api php artisan migrate --force`. El `docker-compose.yml` levanta la API y PostgreSQL; las migraciones son un *release command*, no un paso del arranque.
 - **Resiliencia:** si la API falla, el SDK usa el último estado bueno; antes de la primera descarga devuelve el valor por defecto. Nunca lanza excepciones al evaluar.
 - **Seguridad:** llaves de servidor, guardadas solo como hash y nunca registradas; las listas de permitidos contienen identificadores opacos.
 - **Documentación:** [plan](docs/plan-feature-flags.md), [ADR](docs/adr/0001-design-decisions.md), [especificación](docs/evaluation-spec.md) y [contrato](docs/api-contract.md).
