@@ -105,18 +105,20 @@ Primero el algoritmo, antes que cualquier endpoint.
 **Trampa conocida:** si algo falla en los vectores del hash, revisa primero el orden de bytes y que el entero sea sin signo.
 
 ### Etapa 3: API (3,5 días)
-- [ ] Migraciones: `flags`, `flag_environment_configs`, `api_keys`.
-- [ ] Creación de flags: nacen desactivadas al 100 % en los tres entornos.
-- [ ] Validación según la sección 5 de la spec (clave, porcentaje entero sin `50.0` ni `1e2`, lista de permitidos en bytes UTF-8, presupuesto de 1 MiB por entorno).
-- [ ] Autenticación: llave de administración (comparación en tiempo constante) y llaves por entorno (solo hash en base de datos, prefijo `fp_`, id y prefijo visibles, varias activas por entorno).
-- [ ] Comandos `flagpost:key:create`, `flagpost:key:list` y `flagpost:key:revoke`.
-- [ ] `GET /v1/sdk/flags` con orden determinista, `ETag`, `304`, `Cache-Control: private, no-cache` y `Vary: X-Api-Key`; el `304` repite las cabeceras.
-- [ ] Formas de respuesta completas: lista, objeto individual, `PATCH` de descripción y respuesta del `PUT`.
-- [ ] `explain` usando el evaluador de la etapa 2.
-- [ ] Errores en formato problem details, sin trazas ni credenciales.
-- [ ] Límites de tasa y `GET /up`.
-- [ ] Documentación OpenAPI.
-- [ ] Tests de feature para cada endpoint y para los códigos 400, 401, 403, 404, 405, 409, 413, 415, 422 y 429.
+- [x] Migraciones: `flags`, `flag_environment_configs`, `api_keys`.
+- [x] Creación de flags: nacen desactivadas al 100 % en los tres entornos.
+- [x] Validación según la sección 5 de la spec (clave, porcentaje entero sin `50.0` ni `1e2`, lista de permitidos en bytes UTF-8, presupuesto de 1 MiB por entorno).
+- [x] Autenticación: llave de administración (comparación en tiempo constante) y llaves por entorno (solo hash en base de datos, prefijo `fp_`, id y prefijo visibles, varias activas por entorno).
+- [x] Comandos `flagpost:key:create`, `flagpost:key:list` y `flagpost:key:revoke`.
+- [x] `GET /v1/sdk/flags` con orden determinista, `ETag`, `304`, `Cache-Control: private, no-cache` y `Vary: X-Api-Key`; el `304` repite las cabeceras.
+- [x] Formas de respuesta completas: lista, objeto individual, `PATCH` de descripción y respuesta del `PUT`.
+- [x] `explain` usando el evaluador de la etapa 2.
+- [x] Errores en formato problem details, sin trazas ni credenciales.
+- [x] Límites de tasa y `GET /up`.
+- [x] Documentación OpenAPI.
+- [x] Tests de feature para cada endpoint y para los códigos 400, 401, 403, 404, 405, 409, 413, 415, 422 y 429.
+
+**Resultado:** 224 tests de Pest (248.846 aserciones) en SQLite y PostgreSQL. Los 28 casos compartidos con flag almacenado se ejecutan también a través de `explain`; los casos `NOT_FOUND` se cubren en el núcleo y como `404` en la API. El contrato está en [`openapi.yaml`](openapi.yaml). Los tests desactivan el recorte global de cadenas de Laravel en `/v1` para no alterar ids como `" alice"`.
 
 ### Etapa 4: SDK en C# (3 días)
 - [x] `Bucketing` con `SHA256.HashData` y `BinaryPrimitives.ReadUInt32BigEndian`; `Evaluator` con los mismos siete pasos.

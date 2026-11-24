@@ -2,7 +2,7 @@
 
 The HTTP contract between the PHP API, the C# SDK and any other client. The API is versioned in the path (`/v1`). Within `v1`, changes are additive only.
 
-Related: [ADR 0001](adr/0001-design-decisions.md), [Evaluation spec](evaluation-spec.md).
+Related: [ADR 0001](adr/0001-design-decisions.md), [Evaluation spec](evaluation-spec.md), [OpenAPI description](openapi.yaml).
 
 ## 1. Conventions
 
@@ -207,3 +207,4 @@ Contrato HTTP v1 entre la API en PHP y el SDK en C#:
 - **Administración:** crear, listar, consultar, editar y borrar flags, configurar cada entorno con reemplazo completo, y `explain` para saber por qué un usuario obtuvo cierto resultado. Las respuestas de administración devuelven el objeto flag con `createdAt` y `updatedAt`; `explain` es la excepción.
 - **Límites:** 500 flags, 1000 entradas por lista, 1 MiB de datos de listas por entorno y 1 MiB por petición; el presupuesto por entorno mantiene pequeño el payload del SDK.
 - **Errores** en formato RFC 9457, sin trazas ni credenciales, y límites de tasa documentados. El SDK añade jitter y respeta `Retry-After`.
+- **OpenAPI:** [`openapi.yaml`](openapi.yaml) describe los mismos endpoints, esquemas, cabeceras y errores para generar clientes o validar la implementación.

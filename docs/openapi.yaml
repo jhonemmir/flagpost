@@ -1,0 +1,714 @@
+openapi: 3.0.3
+
+info:
+  title: flagpost API
+  version: "1.0"
+  description: |
+    HTTP contract for the flagpost feature-flag service. The API stores three
+    kinds of rules per flag and environment (on/off, percentage rollout and
+    allow list) and exposes them to the C# SDK.
+
+    Rules:
+    - JSON only. Requests with a body must send `Content-Type: application/json`.
+    - Field names are camelCase and timestamps are ISO 8601 in UTC.
+    - Errors use RFC 9457 problem details (`application/problem+json`).
+    - Secrets are never returned after creation and never appear in errors.
+  license:
+    name: MIT
+    url: https://github.com/jhonemmir/flagpost/blob/main/LICENSE
+
+servers:
+  - url: http://localhost:8000
+    description: Local development
+
+tags:
+  - name: SDK
+    description: Read-only endpoint used by the C# SDK.
+  - name: Flags
+    description: Management endpoints, authenticated with the admin key.
+  - name: Operations
+    description: Unauthenticated operational endpoints.
+
+paths:
+  /up:
+    get:
+      operationId: getHealth
+      tags: [Operations]
+      summary: Health check
+      security: []
+      responses:
+        "200":
+          description: The application is up.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Application up
+        "500":
+          description: The application is not healthy.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Application down
+
+  /v1/flags:
+    get:
+      operationId: listFlags
+      tags: [Flags]
+      summary: List flags
+      description: |
+        Returns every flag sorted by `key` with an ordinal (byte) comparison.
+        Version 1 has no pagination because an installation is capped at 500
+        flags.
+      security:
+        - adminKey: []
+      responses:
+        "200":
+          description: All flags.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FlagList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    post:
+      operationId: createFlag
+      tags: [Flags]
+      summary: Create a flag
+      description: |
+        The flag starts in every environment as `enabled: false`,
+        `percentage: 100`, `allowList: []`. `createdAt` and `updatedAt` are
+        equal at creation.
+      security:
+        - adminKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFlagRequest"
+      responses:
+        "201":
+          description: Flag created.
+          headers:
+            Location:
+              $ref: "#/components/headers/Location"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Flag"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /v1/flags/{key}:
+    parameters:
+      - $ref: "#/components/parameters/FlagKey"
+    get:
+      operationId: getFlag
+      tags: [Flags]
+      summary: Get one flag
+      security:
+        - adminKey: []
+      responses:
+        "200":
+          description: The flag.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Flag"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    patch:
+      operationId: updateFlag
+      tags: [Flags]
+      summary: Update the description
+      description: |
+        Only `description` may be present; any other field returns `422`. An
+        empty string or `null` clears it. `updatedAt` changes on every write.
+      security:
+        - adminKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateFlagRequest"
+      responses:
+        "200":
+          description: Updated flag.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Flag"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+    delete:
+      operationId: deleteFlag
+      tags: [Flags]
+      summary: Delete a flag
+      security:
+        - adminKey: []
+      responses:
+        "204":
+          description: Flag and its environment configurations deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /v1/flags/{key}/environments/{env}:
+    parameters:
+      - $ref: "#/components/parameters/FlagKey"
+      - $ref: "#/components/parameters/Environment"
+    put:
+      operationId: replaceEnvironment
+      tags: [Flags]
+      summary: Replace an environment configuration
+      description: |
+        Full replace, not a patch: all three fields are required. A write that
+        would push the environment over its 1 MiB allow-list budget returns
+        `422`. Duplicates are removed preserving the first occurrence.
+      security:
+        - adminKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EnvironmentConfig"
+      responses:
+        "200":
+          description: Full flag object after the replacement.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Flag"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /v1/flags/{key}/environments/{env}/explain:
+    parameters:
+      - $ref: "#/components/parameters/FlagKey"
+      - $ref: "#/components/parameters/Environment"
+    post:
+      operationId: explainFlag
+      tags: [Flags]
+      summary: Explain an evaluation
+      description: |
+        Runs the normative algorithm for one user and returns the value, the
+        reason code and the bucket. `bucket` is an integer when the algorithm
+        reaches the percentage step and `null` otherwise.
+      security:
+        - adminKey: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExplainRequest"
+      responses:
+        "200":
+          description: Evaluation result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExplainResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "415":
+          $ref: "#/components/responses/UnsupportedMediaType"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+  /v1/sdk/flags:
+    get:
+      operationId: getSdkFlags
+      tags: [SDK]
+      summary: Download the rules of one environment
+      description: |
+        Returns every flag for the environment that owns the key. Flags are
+        sorted by `key` (ordinal) so that the response is byte-stable.
+        `If-None-Match` uses weak comparison (RFC 9110): quoted ETags,
+        `W/` prefixes, comma-separated lists and `*` are accepted.
+      security:
+        - environmentKey: []
+      parameters:
+        - $ref: "#/components/parameters/IfNoneMatch"
+      responses:
+        "200":
+          description: Current snapshot.
+          headers:
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControl"
+            Vary:
+              $ref: "#/components/headers/Vary"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SdkFlagsResponse"
+              example:
+                schemaVersion: 1
+                environment: prod
+                flags:
+                  - key: dark-mode
+                    enabled: true
+                    percentage: 100
+                    allowList: []
+                  - key: new-checkout
+                    enabled: true
+                    percentage: 20
+                    allowList: [alice]
+        "304":
+          description: |
+            No change. The body is empty and `ETag`, `Cache-Control` and
+            `Vary` are repeated.
+          headers:
+            ETag:
+              $ref: "#/components/headers/ETag"
+            Cache-Control:
+              $ref: "#/components/headers/CacheControl"
+            Vary:
+              $ref: "#/components/headers/Vary"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "405":
+          $ref: "#/components/responses/MethodNotAllowed"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+components:
+  securitySchemes:
+    adminKey:
+      type: http
+      scheme: bearer
+      description: |
+        The admin key from `FLAGPOST_ADMIN_KEY`. Compared in constant time.
+        Grants access to the management endpoints only.
+    environmentKey:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+      description: |
+        An environment key shaped `fp_<env>_<32 base62 characters>`. It only
+        grants read access to `GET /v1/sdk/flags` for its own environment.
+        Several keys may be active per environment.
+
+  parameters:
+    FlagKey:
+      name: key
+      in: path
+      required: true
+      description: Flag key.
+      schema:
+        type: string
+        pattern: "^[a-z0-9][a-z0-9._-]{0,63}$"
+        example: new-checkout
+    Environment:
+      name: env
+      in: path
+      required: true
+      description: Fixed environment name.
+      schema:
+        type: string
+        enum: [dev, staging, prod]
+    IfNoneMatch:
+      name: If-None-Match
+      in: header
+      required: false
+      description: Quoted ETag, weak ETag, comma-separated list or `*`.
+      schema:
+        type: string
+      examples:
+        exact:
+          value: '"8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4"'
+        weak:
+          value: 'W/"8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4"'
+        list:
+          value: '"other", W/"8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4"'
+
+  headers:
+    Location:
+      description: Canonical path of the new flag.
+      schema:
+        type: string
+        example: /v1/flags/new-checkout
+    ETag:
+      description: Quoted SHA-256 hex digest of the response body.
+      schema:
+        type: string
+        example: '"8f434346648f6b96df89dda901c5176b10a6d83961dd3c1ac88b59b2dc327aa4"'
+    CacheControl:
+      description: Avoids shared caches and requires revalidation.
+      schema:
+        type: string
+        example: "private, no-cache"
+    Vary:
+      description: The payload depends on the environment key.
+      schema:
+        type: string
+        example: X-Api-Key
+    RetryAfter:
+      description: Seconds to wait before retrying.
+      schema:
+        type: integer
+        minimum: 1
+
+  schemas:
+    EnvironmentConfig:
+      type: object
+      additionalProperties: false
+      required: [enabled, percentage, allowList]
+      properties:
+        enabled:
+          type: boolean
+          description: JSON boolean; `"true"` and `1` are rejected.
+        percentage:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: |
+            A JSON number token with no decimal point and no exponent. `50.0`,
+            `50.5`, `1e2` and `"50"` are rejected.
+        allowList:
+          type: array
+          maxItems: 1000
+          description: |
+            At most 1000 non-empty strings. Each entry is at most 256 bytes in
+            UTF-8 (byte length, not characters). Duplicates are removed while
+            preserving order. The sum of entry bytes plus one byte per entry
+            may not exceed 1 MiB per environment.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 256
+            example: alice
+
+    Flag:
+      type: object
+      required: [key, description, createdAt, updatedAt, environments]
+      properties:
+        key:
+          type: string
+          pattern: "^[a-z0-9][a-z0-9._-]{0,63}$"
+          example: new-checkout
+        description:
+          type: string
+          nullable: true
+          maxLength: 500
+          example: Redesigned checkout flow
+        createdAt:
+          type: string
+          format: date-time
+          example: "2026-11-19T15:04:05Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Changes on every write to the flag or any environment.
+          example: "2026-11-19T16:30:00Z"
+        environments:
+          type: object
+          required: [dev, staging, prod]
+          properties:
+            dev:
+              $ref: "#/components/schemas/EnvironmentConfig"
+            staging:
+              $ref: "#/components/schemas/EnvironmentConfig"
+            prod:
+              $ref: "#/components/schemas/EnvironmentConfig"
+
+    FlagList:
+      type: object
+      required: [flags]
+      properties:
+        flags:
+          type: array
+          description: Flags sorted by `key` with an ordinal comparison.
+          items:
+            $ref: "#/components/schemas/Flag"
+
+    CreateFlagRequest:
+      type: object
+      additionalProperties: false
+      required: [key]
+      properties:
+        key:
+          type: string
+          pattern: "^[a-z0-9][a-z0-9._-]{0,63}$"
+          example: new-checkout
+        description:
+          type: string
+          nullable: true
+          maxLength: 500
+          example: Redesigned checkout flow
+
+    UpdateFlagRequest:
+      type: object
+      additionalProperties: false
+      required: [description]
+      properties:
+        description:
+          type: string
+          nullable: true
+          maxLength: 500
+          description: Empty string or `null` clears it.
+
+    ExplainRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        userId:
+          type: string
+          nullable: true
+          example: Alice
+        defaultValue:
+          type: boolean
+          default: false
+
+    ExplainResponse:
+      type: object
+      required: [value, reason, bucket]
+      properties:
+        value:
+          type: boolean
+        reason:
+          type: string
+          enum:
+            - NOT_FOUND
+            - DISABLED
+            - ALLOW_LIST
+            - FULL_ROLLOUT
+            - NO_ROLLOUT
+            - MISSING_USER_ID
+            - PERCENTAGE_IN
+            - PERCENTAGE_OUT
+        bucket:
+          type: integer
+          nullable: true
+          minimum: 0
+          maximum: 99
+          description: |
+            Integer when the algorithm reached the percentage step; `null`
+            otherwise.
+
+    SdkFlag:
+      type: object
+      additionalProperties: true
+      required: [key, enabled, percentage, allowList]
+      properties:
+        key:
+          type: string
+        enabled:
+          type: boolean
+        percentage:
+          type: integer
+          minimum: 0
+          maximum: 100
+        allowList:
+          type: array
+          items:
+            type: string
+
+    SdkFlagsResponse:
+      type: object
+      additionalProperties: true
+      required: [schemaVersion, environment, flags]
+      properties:
+        schemaVersion:
+          type: integer
+          enum: [1]
+        environment:
+          type: string
+          enum: [dev, staging, prod]
+        flags:
+          type: array
+          description: Sorted by `key` with an ordinal comparison.
+          items:
+            $ref: "#/components/schemas/SdkFlag"
+
+    Problem:
+      type: object
+      description: RFC 9457 problem details.
+      required: [type, title, status, detail]
+      properties:
+        type:
+          type: string
+          format: uri
+          example: https://flagpost.dev/problems/validation-error
+        title:
+          type: string
+          example: Validation failed
+        status:
+          type: integer
+          example: 422
+        detail:
+          type: string
+          example: One or more fields are invalid.
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            percentage:
+              - Must be an integer between 0 and 100.
+
+  responses:
+    BadRequest:
+      description: The request body is not valid JSON.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Unauthorized:
+      description: Missing or unknown credential.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Forbidden:
+      description: Valid credential of the wrong kind.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    NotFound:
+      description: Unknown flag or environment, or an unknown path or method.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    MethodNotAllowed:
+      description: The path exists but not for this method.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Conflict:
+      description: A flag with that key already exists.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    PayloadTooLarge:
+      description: Request body larger than 1 MiB.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    UnsupportedMediaType:
+      description: A request with a body did not send `application/json`.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    ValidationError:
+      description: |
+        Validation error: key grammar, percentage token, allow-list size or
+        budget, description length, unknown fields, or the 500-flag cap.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    TooManyRequests:
+      description: Rate limit exceeded.
+      headers:
+        Retry-After:
+          $ref: "#/components/headers/RetryAfter"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    InternalError:
+      description: Unexpected error. The body never contains a stack trace.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"

@@ -58,7 +58,7 @@ jobs:
         run: ./vendor/bin/pint --test
       - name: Static analysis
         working-directory: api
-        run: ./vendor/bin/phpstan analyse --no-progress
+        run: ./vendor/bin/phpstan analyse --no-progress --memory-limit=512M
       - name: Tests (SQLite)
         working-directory: api
         run: ./vendor/bin/pest
