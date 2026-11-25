@@ -4,7 +4,7 @@
 
 Feature flags with client-side evaluation: a small PHP API that stores the rules and a C# SDK that evaluates them locally, in process.
 
-> **Status: early implementation.** The [evaluation spec](docs/evaluation-spec.md), the [API contract](docs/api-contract.md) and the shared [test vectors](spec/vectors/evaluation.json) are written and verified. The evaluation core exists in PHP and C#: both suites pass the same 20 bucket vectors, 30 evaluation cases and property tests. The v1 HTTP API is implemented: management endpoints, the SDK snapshot endpoint, CLI key management, problem details and rate limits. The SDK poller and the NuGet package are still to come.
+> **Status: early implementation.** The [evaluation spec](docs/evaluation-spec.md), the [API contract](docs/api-contract.md) and the shared [test vectors](spec/vectors/evaluation.json) are written and verified. The evaluation core exists in PHP and C#: both suites pass the same 20 bucket vectors, 30 evaluation cases and property tests. The v1 HTTP API is implemented: management endpoints, the SDK snapshot endpoint, CLI key management, problem details and rate limits. The C# SDK client is implemented: snapshot polling with ETag, jitter/backoff, `NOT_READY`, and DI registration. The NuGet package and sample app are still to come.
 
 `flagpost` is a working name. It must be checked on GitHub, NuGet and Packagist before the first public release.
 
@@ -35,7 +35,7 @@ A user is inside the rollout when `bucket < percentage`. Raising the percentage 
 docs/                  ADR, evaluation spec, API contract, OpenAPI, project plan
 spec/vectors/          Shared contract vectors (single source of truth)
 api/                   Laravel API (PHP 8.4): evaluation core and v1 endpoints done
-sdk-dotnet/            Flagpost.Client (net8.0 / net10.0): evaluation core done, sync pending
+sdk-dotnet/            Flagpost.Client (net8.0 / net10.0): evaluation core, polling client, DI extension
 samples/               Example ASP.NET Core application     — planned, stage 7
 ```
 

@@ -13,6 +13,7 @@ public static class ReasonCodeExtensions
         ReasonCode.MissingUserId => "MISSING_USER_ID",
         ReasonCode.PercentageIn => "PERCENTAGE_IN",
         ReasonCode.PercentageOut => "PERCENTAGE_OUT",
+        ReasonCode.NotReady => "NOT_READY",
         _ => throw new ArgumentOutOfRangeException(nameof(reason), reason, null),
     };
 }

@@ -11,4 +11,5 @@ public enum ReasonCode
     MissingUserId,
     PercentageIn,
     PercentageOut,
+    NotReady,
 }

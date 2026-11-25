@@ -123,13 +123,15 @@ Primero el algoritmo, antes que cualquier endpoint.
 ### Etapa 4: SDK en C# (3 días)
 - [x] `Bucketing` con `SHA256.HashData` y `BinaryPrimitives.ReadUInt32BigEndian`; `Evaluator` con los mismos siete pasos.
 - [x] Tests de contrato sobre **el mismo** `spec/vectors/evaluation.json` y la misma prueba de propiedad.
-- [ ] `FlagClient` con snapshot inmutable que se reemplaza de forma atómica y `HashSet` ordinal por flag para las listas.
-- [ ] Poller con `ETag`, intervalo configurable (mínimo 5 s), jitter de ±20 %, timeout, `Retry-After` y retroceso exponencial en `401`/`403`/`429`.
-- [ ] Razón `NOT_READY` antes de la primera descarga.
-- [ ] Extensión `AddFlagpost(options => ...)` con servicio en segundo plano.
-- [ ] Tests con un `HttpMessageHandler` falso: primera descarga, `304`, fallo tras éxito, JSON inválido, campo con tipo incorrecto, `schemaVersion` desconocido, timeout y `401` con retroceso.
+- [x] `FlagClient` con snapshot inmutable que se reemplaza de forma atómica y `HashSet` ordinal por flag para las listas.
+- [x] Poller con `ETag`, intervalo configurable (mínimo 5 s), jitter de ±20 %, timeout, `Retry-After` y retroceso exponencial en `401`/`403`/`429`.
+- [x] Razón `NOT_READY` antes de la primera descarga.
+- [x] Extensión `AddFlagpost(options => ...)` con servicio en segundo plano.
+- [x] Tests con un `HttpMessageHandler` falso: primera descarga, `304`, fallo tras éxito, JSON inválido, campo con tipo incorrecto, `schemaVersion` desconocido, timeout y `401` con retroceso.
 - [x] Multi-target `net8.0` y `net10.0` en la biblioteca (los tests corren en `net10.0`).
-- [ ] Verificar que la llave nunca aparece en los logs.
+- [x] Verificar que la llave nunca aparece en los logs.
+
+**Resultado:** 67 tests de xUnit en `net10.0`, todos en verde. La biblioteca compila para `net8.0` y `net10.0`. El cliente mantiene el último snapshot bueno ante 304/fallos/JSON inválido/tipos incorrectos/schema desconocido/timeout, aplica jitter ±20%, respeta `Retry-After` y hace backoff exponencial en 401/403/429.
 
 ### Etapa 5: CI (1 día)
 - [x] `ci.yml` con job de PHP: Pint, Larastan/PHPStan y Pest contra SQLite **y** PostgreSQL.
