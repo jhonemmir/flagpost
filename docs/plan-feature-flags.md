@@ -83,7 +83,7 @@ flagpost/
 - [ ] Cambiar el estado del ADR a *Accepted*.
 - [x] Verificar versiones: PHP 8.4 o superior, la versión estable de Laravel que lo soporte y los paquetes de Microsoft.Extensions para `net8.0` y `net10.0`. Anota las versiones y la fecha en el ADR.
 
-**Versiones verificadas (2026-11-23):** PHP 8.4.28, Laravel 13.43.0, Pest 4.7.8, Larastan 3.15.0, Pint 1.32.3, .NET SDK 10.0.404 (biblioteca multi-target `net8.0`/`net10.0`). El SDK 10 descarga los paquetes de referencia de .NET 8 desde NuGet; no hace falta instalar otro SDK.
+**Versiones verificadas (2026-11-23):** PHP 8.4.28, Laravel 13.43.0, Pest 4.7.8, Larastan 3.15.0, Pint 1.32.3, .NET SDK 10.0.404 (biblioteca multi-target `net8.0`/`net10.0`). El SDK 10 descarga los paquetes de referencia de .NET 8 desde NuGet; para ejecutar los tests de `net8.0` con solo ese SDK hay que usar `DOTNET_ROLL_FORWARD=Major` o instalar el runtime 8. En CI se instalan ambos SDK.
 
 ### Etapa 1: Repositorio (medio día)
 - [x] Crear el repo con licencia MIT, `.gitignore` de PHP/.NET y los documentos en `docs/` y `spec/`.
@@ -143,10 +143,12 @@ Primero el algoritmo, antes que cualquier endpoint.
 **Resultado:** el job .NET instala SDKs 8.0.x y 10.0.x, compila la solución y ejecuta tests en `net10.0` y `net8.0` con `coverlet.collector` (`XPlat Code Coverage`), subiendo `TestResults/` como artefacto por OS. Localmente: 67 tests passed en `net10.0` y 67 en `net8.0`.
 
 ### Etapa 6: Despliegue y publicación (1,5 días)
-- [ ] `Dockerfile` de la API y despliegue en un plan gratuito (Render, Fly.io u Oracle Cloud Always Free) con Postgres gratuito (Neon o Supabase). Revisa las condiciones vigentes; los límites cambian.
-- [ ] Migraciones como *release command* (no al arrancar el contenedor) y `GET /up` como health check. Configura `APP_KEY` y `FLAGPOST_ADMIN_KEY` como secretos.
-- [ ] Release del SDK a NuGet con publicación confiable (OIDC) desde GitHub Actions, igual que en envparity.
-- [ ] Publicar una `0.1.0-alpha.1` cuanto antes para reservar el nombre.
+- [x] `Dockerfile` de producción de la API (usuario no root, opcache, php.ini de producción) y configuración de Fly.io en `api/fly.toml` con `release_command` para migraciones y health check en `/up`.
+- [ ] Desplegar en Fly.io con Postgres gratuito (Neon o Supabase) y configurar `APP_KEY`, `FLAGPOST_ADMIN_KEY` y `DB_URL` como secretos.
+- [x] Preparar el paquete NuGet: metadatos, README empaquetado y workflow de publicación confiable (OIDC) en `.github/workflows/nuget.yml`.
+- [ ] Crear la política de *trusted publishing* en nuget.org y publicar `0.1.0-alpha.1` para reservar el nombre.
+
+**Resultado parcial:** la imagen de la API compila y responde en `/up`; el despliegue real y la publicación quedan pendientes de cuentas y secretos. Los pasos están en [`deployment.md`](deployment.md).
 
 ### Etapa 7: App de ejemplo, documentación y release (1,5 días)
 - [ ] `samples/dotnet-webapp`: una página que muestra algo distinto según un flag.

@@ -4,7 +4,7 @@
 
 Feature flags with client-side evaluation: a small PHP API that stores the rules and a C# SDK that evaluates them locally, in process.
 
-> **Status: early implementation.** The [evaluation spec](docs/evaluation-spec.md), the [API contract](docs/api-contract.md) and the shared [test vectors](spec/vectors/evaluation.json) are written and verified. The evaluation core exists in PHP and C#: both suites pass the same 20 bucket vectors, 30 evaluation cases and property tests. The v1 HTTP API is implemented: management endpoints, the SDK snapshot endpoint, CLI key management, problem details and rate limits. The C# SDK client is implemented: snapshot polling with ETag, jitter/backoff, `NOT_READY`, and DI registration. The NuGet package and sample app are still to come.
+> **Status: early implementation.** The [evaluation spec](docs/evaluation-spec.md), the [API contract](docs/api-contract.md) and the shared [test vectors](spec/vectors/evaluation.json) are written and verified. The evaluation core exists in PHP and C#: both suites pass the same 20 bucket vectors, 30 evaluation cases and property tests. The v1 HTTP API is implemented: management endpoints, the SDK snapshot endpoint, CLI key management, problem details and rate limits. The C# SDK client is implemented: snapshot polling with ETag, jitter/backoff, `NOT_READY`, and DI registration. Deployment configuration and the NuGet trusted-publishing workflow are ready; the public demo and the first package publish still need accounts and secrets.
 
 `flagpost` is a working name. It must be checked on GitHub, NuGet and Packagist before the first public release.
 
@@ -32,11 +32,13 @@ A user is inside the rollout when `bucket < percentage`. Raising the percentage 
 ## Repository layout
 
 ```
-docs/                  ADR, evaluation spec, API contract, OpenAPI, project plan
+docs/                  ADR, specs, API contract, OpenAPI, deployment and project plan
 spec/vectors/          Shared contract vectors (single source of truth)
-api/                   Laravel API (PHP 8.4): evaluation core and v1 endpoints done
+api/                   Laravel API (PHP 8.4): evaluation core, v1 endpoints and fly.toml
 sdk-dotnet/            Flagpost.Client (net8.0 / net10.0): evaluation core, polling client, DI extension
 samples/               Example ASP.NET Core application     — planned, stage 7
+.github/workflows/     CI and NuGet trusted-publishing workflows
+CHANGELOG.md            Release notes for the SDK
 ```
 
 ## Documentation
@@ -48,6 +50,7 @@ samples/               Example ASP.NET Core application     — planned, stage 7
 | [Evaluation spec](docs/evaluation-spec.md) | Algorithm, invariants, reason codes and 30 cases |
 | [API contract](docs/api-contract.md) | HTTP contract v1, errors, limits and rate limits |
 | [OpenAPI](docs/openapi.yaml) | Machine-readable description of every v1 endpoint |
+| [Deployment and release](docs/deployment.md) | Fly.io deployment, release command, secrets and NuGet trusted publishing |
 
 ## Local development
 
@@ -112,7 +115,7 @@ dotnet test Flagpost.sln -c Release --no-build
 
 The PHP and .NET test projects both read `spec/vectors/evaluation.json`; the .NET project copies it into its build output. The same commands run in [CI](.github/workflows/ci.yml), where the PHP suite is also run against PostgreSQL.
 
-The API will eventually ship as a Docker image; the SDK will be published to NuGet as `Flagpost.Client`.
+The API ships as a Docker image (`api/Dockerfile`) and the SDK is published to NuGet as `Flagpost.Client`. See [deployment and release](docs/deployment.md).
 
 ## Security
 
@@ -131,13 +134,14 @@ MIT. See [LICENSE](LICENSE).
 
 `flagpost` es un servicio de *feature flags* con evaluación en el cliente: una API en PHP guarda las reglas y un SDK en C# las evalúa localmente, sin llamadas de red por cada comprobación.
 
-**Estado:** implementación inicial. La especificación, el contrato HTTP y los vectores compartidos están escritos y verificados. El núcleo de evaluación ya está implementado en PHP y en C#: ambas suites pasan los mismos 20 vectores del hash, 30 casos y pruebas de propiedad. La API v1 está implementada: administración de flags, endpoint para el SDK, gestión de llaves por CLI, errores RFC 9457 y límites de tasa. Faltan el poller del SDK y la publicación.
+**Estado:** implementación inicial. La especificación, el contrato HTTP y los vectores compartidos están escritos y verificados. El núcleo de evaluación ya está implementado en PHP y en C#: ambas suites pasan los mismos 20 vectores del hash, 30 casos y pruebas de propiedad. La API v1 está implementada: administración de flags, endpoint para el SDK, gestión de llaves por CLI, errores RFC 9457 y límites de tasa. El SDK incluye el poller con ETag, reintentos y evaluación local. La imagen Docker y el flujo de publicación en NuGet están listos; faltan el despliegue público y la primera publicación, que requieren cuentas y secretos.
 
 - **Un solo algoritmo, dos lenguajes:** SHA-256 de `flagKey:userId`, primeros 4 bytes como entero sin signo, módulo 100. Un usuario siempre cae en el mismo grupo y subir el porcentaje nunca le quita la función a nadie.
 - **Arranque local:** `scripts/dev-env.sh`, `docker compose up --build` y `docker compose run --rm api php artisan migrate --force`. El `docker-compose.yml` levanta la API y PostgreSQL; las migraciones son un *release command*, no un paso del arranque.
 - **API v1:** endpoints de administración con la llave `Authorization: Bearer`, snapshot para el SDK con `X-Api-Key`, `ETag`/`304` y cabeceras de caché; `explain` reutiliza el evaluador de PHP. Las llaves de entorno se crean, listan y revocan solo por CLI.
 - **Resiliencia:** si la API falla, el SDK usa el último estado bueno; antes de la primera descarga devuelve el valor por defecto. Nunca lanza excepciones al evaluar.
 - **Seguridad:** llaves de servidor, guardadas solo como hash y nunca registradas; las listas de permitidos contienen identificadores opacos.
-- **Documentación:** [plan](docs/plan-feature-flags.md), [ADR](docs/adr/0001-design-decisions.md), [especificación](docs/evaluation-spec.md), [contrato](docs/api-contract.md) y [OpenAPI](docs/openapi.yaml).
+- **Despliegue:** `api/Dockerfile` y `api/fly.toml`; las migraciones son un *release command* y `/up` es el health check. La publicación del SDK usa OIDC desde `.github/workflows/nuget.yml`.
+- **Documentación:** [plan](docs/plan-feature-flags.md), [ADR](docs/adr/0001-design-decisions.md), [especificación](docs/evaluation-spec.md), [contrato](docs/api-contract.md), [OpenAPI](docs/openapi.yaml) y [despliegue](docs/deployment.md).
 
 El nombre `flagpost` es provisional y hay que comprobarlo antes de publicar.

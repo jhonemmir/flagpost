@@ -6,10 +6,25 @@
     <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
     <PackageId>Flagpost.Client</PackageId>
-    <Description>Feature flags with client-side evaluation for .NET.</Description>
+    <Version>0.1.0-alpha.1</Version>
+    <Authors>flagpost contributors</Authors>
+    <Company>flagpost</Company>
+    <Copyright>Copyright (c) 2026 flagpost contributors</Copyright>
+    <Description>Feature flags with client-side evaluation for .NET. Polls a Flagpost API, keeps the last good snapshot and evaluates locally.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/jhonemmir/flagpost</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/jhonemmir/flagpost</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>feature-flags;feature-toggle;configuration;aspnetcore</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <NoWarn>$(NoWarn);CA1848</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.5" />
