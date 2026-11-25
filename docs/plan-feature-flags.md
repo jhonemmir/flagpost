@@ -138,7 +138,9 @@ Primero el algoritmo, antes que cualquier endpoint.
 - [x] `ci.yml` con job de .NET: build multi-target y tests en Linux y Windows.
 - [x] **Job de contrato:** `scripts/check_vectors.py` valida `evaluation.json` (ids únicos, `first4BytesHex` coherente con el bucket, `vectorsVersion`) con una tercera implementación independiente. Las suites de PHP y C# corren en sus propios jobs de cada push.
 - [x] Badge de estado en el README.
-- [ ] Cobertura de código y ejecución de la suite de tests también en `net8.0`.
+- [x] Cobertura de código y ejecución de la suite de tests también en `net8.0`.
+
+**Resultado:** el job .NET instala SDKs 8.0.x y 10.0.x, compila la solución y ejecuta tests en `net10.0` y `net8.0` con `coverlet.collector` (`XPlat Code Coverage`), subiendo `TestResults/` como artefacto por OS. Localmente: 67 tests passed en `net10.0` y 67 en `net8.0`.
 
 ### Etapa 6: Despliegue y publicación (1,5 días)
 - [ ] `Dockerfile` de la API y despliegue en un plan gratuito (Render, Fly.io u Oracle Cloud Always Free) con Postgres gratuito (Neon o Supabase). Revisa las condiciones vigentes; los límites cambian.
