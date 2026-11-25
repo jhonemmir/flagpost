@@ -1,7 +1,7 @@
 # Fly.io deployment for the Flagpost API.
 #
-# Deploy from this directory:
-#   fly deploy
+# Deploy from this directory with one Machine (recommended for the free plan):
+#   fly deploy --ha=false
 #
 # Secrets (never commit them):
 #   fly secrets set APP_KEY="base64:..." \
