@@ -6,7 +6,14 @@ change made through the API appears without restarting the application.
 
 ## Run it
 
-From the repository root, set an environment key and start the app:
+From the repository root, the Docker wrapper reads the key from
+`~/.config/flagpost/fly.env` when it is available:
+
+```bash
+scripts/run-sample.sh
+```
+
+Or start it directly with the .NET SDK:
 
 ```bash
 export Flagpost__ApiKey="fp_prod_..."
@@ -20,11 +27,14 @@ http://localhost:5080/?user=alice
 ```
 
 The sample defaults to the deployed API at `https://flagpost-api.fly.dev` and
-polls every five seconds. Override either value if needed:
+polls every five seconds. The first fetch can take longer while the free API
+and database wake up, so the sample allows 30 seconds per request. Override the
+values if needed:
 
 ```bash
 export Flagpost__BaseUrl="http://localhost:8000"
 export Flagpost__PollIntervalSeconds="5"
+export Flagpost__HttpTimeoutSeconds="30"
 ```
 
 The environment key is a server-side secret. Do not put it in

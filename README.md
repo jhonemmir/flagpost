@@ -108,6 +108,15 @@ curl -s http://localhost:8000/v1/sdk/flags \
 
 The ASP.NET Core app in [`samples/dotnet-webapp`](samples/dotnet-webapp) evaluates `new-checkout` locally and refreshes every two seconds. Changing the flag through the API changes the page without restarting the app.
 
+The easiest path is the Docker wrapper:
+
+```bash
+scripts/run-sample.sh
+# http://localhost:5080/?user=alice
+```
+
+It reads `FLAGPOST_ENV_KEY` from `~/.config/flagpost/fly.env` when available. If you prefer the .NET SDK:
+
 ```bash
 export Flagpost__ApiKey="fp_prod_..."
 dotnet run --project samples/dotnet-webapp

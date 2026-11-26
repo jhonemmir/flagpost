@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 var baseUrl = builder.Configuration["Flagpost:BaseUrl"] ?? "https://flagpost-api.fly.dev";
 var apiKey = builder.Configuration["Flagpost:ApiKey"];
 var pollSeconds = builder.Configuration.GetValue("Flagpost:PollIntervalSeconds", 5);
+var httpTimeoutSeconds = builder.Configuration.GetValue("Flagpost:HttpTimeoutSeconds", 30);
 
 if (string.IsNullOrWhiteSpace(apiKey))
 {
@@ -21,6 +22,7 @@ builder.Services.AddFlagpost(options =>
     options.BaseUrl = new Uri(baseUrl, UriKind.Absolute);
     options.ApiKey = apiKey;
     options.PollInterval = TimeSpan.FromSeconds(Math.Max(5, pollSeconds));
+    options.HttpTimeout = TimeSpan.FromSeconds(Math.Max(5, httpTimeoutSeconds));
 });
 
 var app = builder.Build();
