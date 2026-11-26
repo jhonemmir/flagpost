@@ -79,8 +79,8 @@ flagpost/
 
 ### Etapa 0: Revisión de la especificación (medio día)
 - [x] Leer el ADR, la spec y el contrato completos y ajustar lo que no te convenza.
-- [ ] Verificar la disponibilidad del nombre (GitHub, NuGet `Flagpost.Client`, Packagist si lo reservas).
-- [ ] Cambiar el estado del ADR a *Accepted*.
+- [x] Verificar la disponibilidad del nombre (GitHub, NuGet `Flagpost.Client`, Packagist si lo reservas).
+- [x] Cambiar el estado del ADR a *Accepted*.
 - [x] Verificar versiones: PHP 8.4 o superior, la versión estable de Laravel que lo soporte y los paquetes de Microsoft.Extensions para `net8.0` y `net10.0`. Anota las versiones y la fecha en el ADR.
 
 **Versiones verificadas (2026-11-23):** PHP 8.4.28, Laravel 13.43.0, Pest 4.7.8, Larastan 3.15.0, Pint 1.32.3, .NET SDK 10.0.404 (biblioteca multi-target `net8.0`/`net10.0`). El SDK 10 descarga los paquetes de referencia de .NET 8 desde NuGet; para ejecutar los tests de `net8.0` con solo ese SDK hay que usar `DOTNET_ROLL_FORWARD=Major` o instalar el runtime 8. En CI se instalan ambos SDK.
@@ -146,9 +146,9 @@ Primero el algoritmo, antes que cualquier endpoint.
 - [x] `Dockerfile` de producción de la API (usuario no root, opcache, php.ini de producción) y configuración de Fly.io en `api/fly.toml` con `release_command` para migraciones y health check en `/up`.
 - [x] Desplegar en Fly.io con Neon Postgres y configurar `APP_KEY`, `FLAGPOST_ADMIN_KEY` y `DB_URL` como secretos. La API responde en https://flagpost-api.fly.dev/up con una sola máquina.
 - [x] Preparar el paquete NuGet: metadatos, README empaquetado y workflow de publicación confiable (OIDC) en `.github/workflows/nuget.yml`.
-- [ ] Crear la política de *trusted publishing* en nuget.org y publicar `0.1.0-alpha.1` para reservar el nombre.
+- [x] Crear la política de *trusted publishing* en nuget.org y publicar `0.1.0-alpha.1` para reservar el nombre. El paquete está en https://www.nuget.org/packages/Flagpost.Client.
 
-**Resultado:** la API está desplegada en https://flagpost-api.fly.dev (Fly.io + Neon, una máquina, migraciones en el *release command* y health check en `/up`). La publicación del SDK queda pendiente de la política de *trusted publishing* y de la primera versión. Los pasos están en [`deployment.md`](deployment.md).
+**Resultado:** la API está desplegada en https://flagpost-api.fly.dev (Fly.io + Neon, una máquina, migraciones en el *release command* y health check en `/up`). `Flagpost.Client 0.1.0-alpha.1` está publicado en NuGet y se instala correctamente. Los pasos están en [`deployment.md`](deployment.md).
 
 ### Etapa 7: App de ejemplo, documentación y release (1,5 días)
 - [ ] `samples/dotnet-webapp`: una página que muestra algo distinto según un flag.
@@ -252,7 +252,7 @@ No recortes los vectores compartidos ni el job de contrato: son lo que hace inte
 
 ## 10. Definición de "terminado"
 
-- [ ] `dotnet add package Flagpost.Client` funciona desde NuGet.
+- [x] `dotnet add package Flagpost.Client --version 0.1.0-alpha.1` funciona desde NuGet.
 - [x] La API está desplegada y responde en `GET /up`.
 - [x] CI en verde en `main` para API, SDK y contrato.
 - [x] Los 30 casos y los 20 vectores pasan en PHP **y** en C#, afirmando también el hex de los vectores.

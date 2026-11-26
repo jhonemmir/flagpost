@@ -1,12 +1,13 @@
 # flagpost
 
 [![CI](https://github.com/jhonemmir/flagpost/actions/workflows/ci.yml/badge.svg)](https://github.com/jhonemmir/flagpost/actions/workflows/ci.yml)
+[![NuGet](https://img.shields.io/nuget/vpre/Flagpost.Client.svg)](https://www.nuget.org/packages/Flagpost.Client)
 
 Feature flags with client-side evaluation: a small PHP API that stores the rules and a C# SDK that evaluates them locally, in process.
 
-> **Status: early implementation.** The [evaluation spec](docs/evaluation-spec.md), the [API contract](docs/api-contract.md) and the shared [test vectors](spec/vectors/evaluation.json) are written and verified. The evaluation core exists in PHP and C#: both suites pass the same 20 bucket vectors, 30 evaluation cases and property tests. The v1 HTTP API is implemented: management endpoints, the SDK snapshot endpoint, CLI key management, problem details and rate limits. The C# SDK client is implemented: snapshot polling with ETag, jitter/backoff, `NOT_READY`, and DI registration. The API is deployed at [https://flagpost-api.fly.dev](https://flagpost-api.fly.dev) (Fly.io + Neon Postgres); the first NuGet publish still needs the trusted-publishing policy and credentials.
+> **Status: early implementation.** The [evaluation spec](docs/evaluation-spec.md), the [API contract](docs/api-contract.md) and the shared [test vectors](spec/vectors/evaluation.json) are written and verified. The evaluation core exists in PHP and C#: both suites pass the same 20 bucket vectors, 30 evaluation cases and property tests. The v1 HTTP API is implemented: management endpoints, the SDK snapshot endpoint, CLI key management, problem details and rate limits. The C# SDK client is implemented: snapshot polling with ETag, jitter/backoff, `NOT_READY`, and DI registration. The API is deployed at [https://flagpost-api.fly.dev](https://flagpost-api.fly.dev) (Fly.io + Neon Postgres) and `Flagpost.Client` `0.1.0-alpha.1` is published on NuGet.
 
-`flagpost` is a working name. It must be checked on GitHub, NuGet and Packagist before the first public release.
+`flagpost` is the project name. The SDK is published as `Flagpost.Client` on NuGet.
 
 ## What it does
 
@@ -51,6 +52,7 @@ CHANGELOG.md            Release notes for the SDK
 | [API contract](docs/api-contract.md) | HTTP contract v1, errors, limits and rate limits |
 | [OpenAPI](docs/openapi.yaml) | Machine-readable description of every v1 endpoint |
 | [Deployment and release](docs/deployment.md) | Fly.io deployment, release command, secrets and NuGet trusted publishing |
+| [NuGet package](https://www.nuget.org/packages/Flagpost.Client) | Published preview of the C# SDK |
 
 ## Local development
 
@@ -134,7 +136,7 @@ MIT. See [LICENSE](LICENSE).
 
 `flagpost` es un servicio de *feature flags* con evaluación en el cliente: una API en PHP guarda las reglas y un SDK en C# las evalúa localmente, sin llamadas de red por cada comprobación.
 
-**Estado:** implementación inicial. La especificación, el contrato HTTP y los vectores compartidos están escritos y verificados. El núcleo de evaluación ya está implementado en PHP y en C#: ambas suites pasan los mismos 20 vectores del hash, 30 casos y pruebas de propiedad. La API v1 está implementada: administración de flags, endpoint para el SDK, gestión de llaves por CLI, errores RFC 9457 y límites de tasa. El SDK incluye el poller con ETag, reintentos y evaluación local. La API está desplegada en [https://flagpost-api.fly.dev](https://flagpost-api.fly.dev) (Fly.io + Neon Postgres); falta la primera publicación en NuGet, que requiere la política de *trusted publishing* y credenciales.
+**Estado:** implementación inicial. La especificación, el contrato HTTP y los vectores compartidos están escritos y verificados. El núcleo de evaluación ya está implementado en PHP y en C#: ambas suites pasan los mismos 20 vectores del hash, 30 casos y pruebas de propiedad. La API v1 está implementada: administración de flags, endpoint para el SDK, gestión de llaves por CLI, errores RFC 9457 y límites de tasa. El SDK incluye el poller con ETag, reintentos y evaluación local. La API está desplegada en [https://flagpost-api.fly.dev](https://flagpost-api.fly.dev) (Fly.io + Neon Postgres) y `Flagpost.Client` `0.1.0-alpha.1` ya está publicado en NuGet.
 
 - **Un solo algoritmo, dos lenguajes:** SHA-256 de `flagKey:userId`, primeros 4 bytes como entero sin signo, módulo 100. Un usuario siempre cae en el mismo grupo y subir el porcentaje nunca le quita la función a nadie.
 - **Arranque local:** `scripts/dev-env.sh`, `docker compose up --build` y `docker compose run --rm api php artisan migrate --force`. El `docker-compose.yml` levanta la API y PostgreSQL; las migraciones son un *release command*, no un paso del arranque.
@@ -144,4 +146,4 @@ MIT. See [LICENSE](LICENSE).
 - **Despliegue:** `api/Dockerfile` y `api/fly.toml`; las migraciones son un *release command* y `/up` es el health check. La publicación del SDK usa OIDC desde `.github/workflows/nuget.yml`.
 - **Documentación:** [plan](docs/plan-feature-flags.md), [ADR](docs/adr/0001-design-decisions.md), [especificación](docs/evaluation-spec.md), [contrato](docs/api-contract.md), [OpenAPI](docs/openapi.yaml) y [despliegue](docs/deployment.md).
 
-El nombre `flagpost` es provisional y hay que comprobarlo antes de publicar.
+`flagpost` es el nombre del proyecto; el SDK se publica como `Flagpost.Client` en NuGet.

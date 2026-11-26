@@ -2,13 +2,14 @@
 
 | Field | Value |
 |---|---|
-| Status | Proposed |
+| Status | Accepted |
 | Date | 2026-11-19 |
+| Accepted | 2026-11-26 |
 | Owners | Project maintainer |
 | Scope | v1.0 |
 | Related | [Evaluation spec](../evaluation-spec.md), [API contract](../api-contract.md) |
 
-> `flagpost` is a **working name**. Check that it is free on GitHub, NuGet and Packagist before creating the repository, and update this ADR if it changes.
+> `flagpost` is the chosen name. The GitHub repository is `jhonemmir/flagpost`, `Flagpost.Client` is published on NuGet, and Packagist has no `flagpost` package; the API is not published to Packagist.
 
 ## Context
 
