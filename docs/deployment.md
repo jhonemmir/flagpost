@@ -52,6 +52,11 @@ the name Fly.io uses when it attaches a database. URL-encode special characters
 in the password (for example `@` as `%40`) and keep `sslmode=require` for a
 managed database.
 
+Use the **direct** Neon connection string (without `-pooler`) as `DB_URL`: the
+same secret is used by the release command that runs migrations. Neon's pooled
+endpoint is for high connection churn; if you use it, run migrations separately
+against the direct endpoint.
+
 #### Option B: Fly Managed Postgres
 
 Requires flyctl v0.5.15 or later (`fly version upgrade`). The Developer plan

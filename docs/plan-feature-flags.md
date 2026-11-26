@@ -144,11 +144,11 @@ Primero el algoritmo, antes que cualquier endpoint.
 
 ### Etapa 6: Despliegue y publicación (1,5 días)
 - [x] `Dockerfile` de producción de la API (usuario no root, opcache, php.ini de producción) y configuración de Fly.io en `api/fly.toml` con `release_command` para migraciones y health check en `/up`.
-- [ ] Desplegar en Fly.io con Postgres gratuito (Neon o Supabase) y configurar `APP_KEY`, `FLAGPOST_ADMIN_KEY` y `DB_URL` como secretos.
+- [x] Desplegar en Fly.io con Neon Postgres y configurar `APP_KEY`, `FLAGPOST_ADMIN_KEY` y `DB_URL` como secretos. La API responde en https://flagpost-api.fly.dev/up con una sola máquina.
 - [x] Preparar el paquete NuGet: metadatos, README empaquetado y workflow de publicación confiable (OIDC) en `.github/workflows/nuget.yml`.
 - [ ] Crear la política de *trusted publishing* en nuget.org y publicar `0.1.0-alpha.1` para reservar el nombre.
 
-**Resultado parcial:** la imagen de la API compila y responde en `/up`; el despliegue real y la publicación quedan pendientes de cuentas y secretos. Los pasos están en [`deployment.md`](deployment.md).
+**Resultado:** la API está desplegada en https://flagpost-api.fly.dev (Fly.io + Neon, una máquina, migraciones en el *release command* y health check en `/up`). La publicación del SDK queda pendiente de la política de *trusted publishing* y de la primera versión. Los pasos están en [`deployment.md`](deployment.md).
 
 ### Etapa 7: App de ejemplo, documentación y release (1,5 días)
 - [ ] `samples/dotnet-webapp`: una página que muestra algo distinto según un flag.
@@ -253,12 +253,12 @@ No recortes los vectores compartidos ni el job de contrato: son lo que hace inte
 ## 10. Definición de "terminado"
 
 - [ ] `dotnet add package Flagpost.Client` funciona desde NuGet.
-- [ ] La API está desplegada y responde en `GET /up`.
-- [ ] CI en verde en `main` para API, SDK y contrato.
-- [ ] Los 30 casos y los 20 vectores pasan en PHP **y** en C#, afirmando también el hex de los vectores.
-- [ ] Larastan/PHPStan en nivel máximo sin errores, y Pest en verde contra SQLite y PostgreSQL.
+- [x] La API está desplegada y responde en `GET /up`.
+- [x] CI en verde en `main` para API, SDK y contrato.
+- [x] Los 30 casos y los 20 vectores pasan en PHP **y** en C#, afirmando también el hex de los vectores.
+- [x] Larastan/PHPStan en nivel máximo sin errores, y Pest en verde contra SQLite y PostgreSQL.
 - [ ] README con GIF, inicio rápido, uso del SDK y explicación del algoritmo.
-- [ ] Ninguna llave aparece en logs, respuestas ni errores (hay tests).
+- [x] Ninguna llave aparece en logs, respuestas ni errores (hay tests).
 - [ ] Release `1.0.0` publicado y repo fijado en tu perfil.
 
 ---
