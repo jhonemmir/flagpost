@@ -204,21 +204,20 @@ and `.snupkg`.
 ### Publish a version
 
 Use the **Publish NuGet** workflow from the Actions tab with a version such as
-`0.1.0-alpha.1`, or push a tag:
+`1.0.0`, or push a tag:
 
 ```bash
-git tag sdk-v0.1.0-alpha.1
-git push origin sdk-v0.1.0-alpha.1
+git tag sdk-v1.0.0
+git push origin sdk-v1.0.0
 ```
 
-The first publish reserves the package id. Use a prerelease version until the
-API is stable. The workflow uses `--skip-duplicate`, so a rerun after a partial
-failure is safe.
+The workflow uses `--skip-duplicate`, so a rerun after a partial failure is
+safe.
 
 Verify from a clean project:
 
 ```bash
-dotnet add package Flagpost.Client --prerelease
+dotnet add package Flagpost.Client
 ```
 
 ### Pack locally
@@ -270,6 +269,5 @@ with the environment key and call `explain`. The responses must match
 - Las llaves de entorno se crean por CLI y se muestran una sola vez.
 - El SDK se publica en NuGet con *Trusted Publishing* y OIDC desde
   `.github/workflows/nuget.yml`; no hay una API key permanente de NuGet.
-- La primera versión prevista es `0.1.0-alpha.1`; el plan gratuito de Render no
-  incluye `preDeployCommand`, por eso la configuración incluida es la de
-  Fly.io.
+- La versión estable es `1.0.0`; el plan gratuito de Render no incluye
+  `preDeployCommand`, por eso la configuración incluida es la de Fly.io.

@@ -4,13 +4,10 @@ Feature flags with client-side evaluation for .NET 8 and .NET 10. The SDK fetche
 a snapshot of the flags for one environment, keeps the last good copy and
 evaluates every flag in process. User ids never leave the application.
 
-> **Preview:** `0.1.0-alpha.1`. The package name and API may still change before
-> `1.0.0`.
-
 ## Install
 
 ```bash
-dotnet add package Flagpost.Client --prerelease
+dotnet add package Flagpost.Client
 ```
 
 The environment key is a server-side secret. Never use it in browser or mobile

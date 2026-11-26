@@ -151,9 +151,9 @@ Primero el algoritmo, antes que cualquier endpoint.
 **Resultado:** la API está desplegada en https://flagpost-api.fly.dev (Fly.io + Neon, una máquina, migraciones en el *release command* y health check en `/up`). `Flagpost.Client 0.1.0-alpha.1` está publicado en NuGet y se instala correctamente. Los pasos están en [`deployment.md`](deployment.md).
 
 ### Etapa 7: App de ejemplo, documentación y release (1,5 días)
-- [ ] `samples/dotnet-webapp`: una página que muestra algo distinto según un flag.
-- [ ] GIF para el README: cambias el flag por la API y la app cambia sin reiniciarse.
-- [ ] README completo (sección 6), `SECURITY.md`, `CHANGELOG.md`.
+- [x] `samples/dotnet-webapp`: una página que muestra algo distinto según un flag.
+- [x] GIF para el README: cambias el flag por la API y la app cambia sin reiniciarse (`docs/demo.gif`).
+- [x] README completo (sección 6), `SECURITY.md`, `CHANGELOG.md`.
 - [ ] Release `1.0.0` en GitHub, con el paquete publicado.
 - [ ] Fijar el repo en tu perfil y añadirlo a tu portafolio web y LinkedIn.
 
@@ -257,7 +257,7 @@ No recortes los vectores compartidos ni el job de contrato: son lo que hace inte
 - [x] CI en verde en `main` para API, SDK y contrato.
 - [x] Los 30 casos y los 20 vectores pasan en PHP **y** en C#, afirmando también el hex de los vectores.
 - [x] Larastan/PHPStan en nivel máximo sin errores, y Pest en verde contra SQLite y PostgreSQL.
-- [ ] README con GIF, inicio rápido, uso del SDK y explicación del algoritmo.
+- [x] README con GIF, inicio rápido, uso del SDK y explicación del algoritmo.
 - [x] Ninguna llave aparece en logs, respuestas ni errores (hay tests).
 - [ ] Release `1.0.0` publicado y repo fijado en tu perfil.
 

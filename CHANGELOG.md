@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented here.
 
+## [1.0.0] - 2026-11-26
+
+First stable release of `Flagpost.Client`. There are no API changes from
+`0.1.0-alpha.1`; the evaluation contract, polling behavior and options are
+stable.
+
+Install it with:
+
+```bash
+dotnet add package Flagpost.Client
+```
+
 ## [0.1.0-alpha.1] - 2026-11-25
 
 First preview of `Flagpost.Client`.
@@ -26,4 +38,5 @@ First preview of `Flagpost.Client`.
 - The environment key is only sent as `X-Api-Key`; it is never logged.
 - The SDK is intended for server-side use only.
 
+[1.0.0]: https://github.com/jhonemmir/flagpost/releases/tag/sdk-v1.0.0
 [0.1.0-alpha.1]: https://github.com/jhonemmir/flagpost/releases/tag/sdk-v0.1.0-alpha.1

@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <IsPackable>true</IsPackable>
     <PackageId>Flagpost.Client</PackageId>
-    <Version>0.1.0-alpha.1</Version>
+    <Version>1.0.0</Version>
     <Authors>flagpost contributors</Authors>
     <Company>flagpost</Company>
     <Copyright>Copyright (c) 2026 flagpost contributors</Copyright>
