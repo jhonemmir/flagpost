@@ -154,8 +154,10 @@ Primero el algoritmo, antes que cualquier endpoint.
 - [x] `samples/dotnet-webapp`: una página que muestra algo distinto según un flag.
 - [x] GIF para el README: cambias el flag por la API y la app cambia sin reiniciarse (`docs/demo.gif`).
 - [x] README completo (sección 6), `SECURITY.md`, `CHANGELOG.md`.
-- [ ] Release `1.0.0` en GitHub, con el paquete publicado.
+- [x] Release `1.0.0` en GitHub, con el paquete publicado: https://www.nuget.org/packages/Flagpost.Client/1.0.0 y https://github.com/jhonemmir/flagpost/releases/tag/sdk-v1.0.0.
 - [ ] Fijar el repo en tu perfil y añadirlo a tu portafolio web y LinkedIn.
+
+**Resultado:** la app de ejemplo, el GIF, el README completo, `SECURITY.md` y el paquete estable `1.0.0` están publicados. Queda la difusión externa (perfil, portafolio y LinkedIn).
 
 ### Colchón (2 días)
 Para imprevistos de CI, despliegue y publicación.
@@ -252,14 +254,15 @@ No recortes los vectores compartidos ni el job de contrato: son lo que hace inte
 
 ## 10. Definición de "terminado"
 
-- [x] `dotnet add package Flagpost.Client --version 0.1.0-alpha.1` funciona desde NuGet.
+- [x] `dotnet add package Flagpost.Client --version 1.0.0` funciona desde NuGet.
 - [x] La API está desplegada y responde en `GET /up`.
 - [x] CI en verde en `main` para API, SDK y contrato.
 - [x] Los 30 casos y los 20 vectores pasan en PHP **y** en C#, afirmando también el hex de los vectores.
 - [x] Larastan/PHPStan en nivel máximo sin errores, y Pest en verde contra SQLite y PostgreSQL.
 - [x] README con GIF, inicio rápido, uso del SDK y explicación del algoritmo.
 - [x] Ninguna llave aparece en logs, respuestas ni errores (hay tests).
-- [ ] Release `1.0.0` publicado y repo fijado en tu perfil.
+- [x] Release `1.0.0` publicado.
+- [ ] Repo fijado en tu perfil.
 
 ---
 
