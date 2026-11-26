@@ -18,8 +18,8 @@ info:
     url: https://github.com/jhonemmir/flagpost/blob/main/LICENSE
 
 servers:
-  - url: http://localhost:8000
-    description: Local development
+  - url: https://flagpost-api.fly.dev
+    description: Production demo; use http://localhost:8000 for local development.
 
 tags:
   - name: SDK
@@ -38,19 +38,39 @@ paths:
       security: []
       responses:
         "200":
-          description: The application is up.
+          description: >-
+            The application is up. The HTML body contains "Application up";
+            a request with `Accept: application/json` returns `{"status":"up"}`.
           content:
-            text/plain:
+            text/html:
               schema:
                 type: string
-                example: Application up
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    enum: [up]
+        "4XX":
+          description: The health check route is unavailable.
         "500":
-          description: The application is not healthy.
+          description: >-
+            The application is not healthy. The HTML body says so; a request
+            with `Accept: application/json` returns `{"status":"down"}`.
           content:
-            text/plain:
+            text/html:
               schema:
                 type: string
-                example: Application down
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    enum: [down]
 
   /v1/flags:
     get:
