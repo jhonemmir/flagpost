@@ -174,4 +174,4 @@ Este ADR fija 20 decisiones para la v1.0 de `flagpost`:
 - **Resiliencia:** el SDK nunca lanza excepciones al evaluar; usa el último estado bueno o el valor por defecto. Un payload inválido se descarta completo y la llave revocada provoca retroceso exponencial, no reintentos cada 30 s.
 - **Stack:** PHP 8.4 con Laravel, Pest, Larastan y Pint; SQLite en pruebas y PostgreSQL también en CI y en la demo; SDK multi-target `net8.0`/`net10.0` publicado en NuGet; todo en un solo repositorio.
 
-El nombre `flagpost` es provisional: verifica que esté libre antes de crear el repositorio.
+El nombre `flagpost` está confirmado: el repositorio es `jhonemmir/flagpost`, `Flagpost.Client` está publicado en NuGet y Packagist no tiene un paquete `flagpost`; la API no se publica en Packagist.

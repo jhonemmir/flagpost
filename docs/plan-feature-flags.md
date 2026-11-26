@@ -2,14 +2,14 @@
 
 Segundo proyecto de portafolio, pensado para cubrir lo que envparity no muestra: **una API desplegada con demo en vivo**, **PHP moderno** y **dos lenguajes trabajando juntos con un contrato probado**.
 
-**Nombre:** `flagpost` es provisional. Antes de crear el repositorio, verifica que esté libre en GitHub, NuGet y Packagist.
+**Nombre:** `flagpost`. Verificado en GitHub, NuGet (`Flagpost.Client`) y Packagist; el ADR está aceptado.
 **Tamaño:** más grande que envparity (son dos componentes). Calcula **2,5 a 3 semanas**, con las opciones de recorte de la sección 9 si necesitas acortarlo.
 
 Documentos que ya están escritos y son vinculantes:
 
 | Documento | Para qué sirve |
 |---|---|
-| [docs/adr/0001-design-decisions.md](adr/0001-design-decisions.md) | Las 20 decisiones de diseño (estado: *Proposed*; pásalo a *Accepted* cuando lo revises) |
+| [docs/adr/0001-design-decisions.md](adr/0001-design-decisions.md) | Las 20 decisiones de diseño (estado: *Accepted*) |
 | [docs/evaluation-spec.md](evaluation-spec.md) | Algoritmo de evaluación, invariantes y 30 casos |
 | [docs/api-contract.md](api-contract.md) | Contrato HTTP v1 |
 | [spec/vectors/evaluation.json](../spec/vectors/evaluation.json) | 20 vectores del hash y 30 casos que PHP y C# deben pasar |
@@ -100,7 +100,7 @@ Primero el algoritmo, antes que cualquier endpoint.
 - [x] Prueba de propiedad contra un oráculo independiente, no solo la monotonía: precedencia, determinismo, monotonía y totalidad, con 1.000 usuarios generados.
 - [x] Pasar Larastan/PHPStan en nivel máximo.
 
-**Resultado:** 56 tests de Pest, 248.080 aserciones. Los tests unitarios no arrancan Laravel: el evaluador es PHP puro.
+**Resultado:** 56 tests de Pest en el hito del núcleo, 248.080 aserciones. La suite completa actual es la de la etapa 3. Los tests unitarios no arrancan Laravel: el evaluador es PHP puro.
 
 **Trampa conocida:** si algo falla en los vectores del hash, revisa primero el orden de bytes y que el entero sea sin signo.
 
@@ -128,10 +128,10 @@ Primero el algoritmo, antes que cualquier endpoint.
 - [x] Razón `NOT_READY` antes de la primera descarga.
 - [x] Extensión `AddFlagpost(options => ...)` con servicio en segundo plano.
 - [x] Tests con un `HttpMessageHandler` falso: primera descarga, `304`, fallo tras éxito, JSON inválido, campo con tipo incorrecto, `schemaVersion` desconocido, timeout y `401` con retroceso.
-- [x] Multi-target `net8.0` y `net10.0` en la biblioteca (los tests corren en `net10.0`).
+- [x] Multi-target `net8.0` y `net10.0` en la biblioteca (los tests corren en ambos TFM desde la etapa 5).
 - [x] Verificar que la llave nunca aparece en los logs.
 
-**Resultado:** 67 tests de xUnit en `net10.0`, todos en verde. La biblioteca compila para `net8.0` y `net10.0`. El cliente mantiene el último snapshot bueno ante 304/fallos/JSON inválido/tipos incorrectos/schema desconocido/timeout, aplica jitter ±20%, respeta `Retry-After` y hace backoff exponencial en 401/403/429.
+**Resultado:** 67 tests de xUnit en cada TFM (`net8.0` y `net10.0`), todos en verde. La biblioteca compila para ambos. El cliente mantiene el último snapshot bueno ante 304/fallos/JSON inválido/tipos incorrectos/schema desconocido/timeout, aplica jitter ±20%, respeta `Retry-After` y hace backoff exponencial en 401/403/429.
 
 ### Etapa 5: CI (1 día)
 - [x] `ci.yml` con job de PHP: Pint, Larastan/PHPStan y Pest contra SQLite **y** PostgreSQL.
